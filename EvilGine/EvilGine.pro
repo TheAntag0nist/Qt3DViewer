@@ -9,12 +9,20 @@ CONFIG += c++11
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += \
+    Engine/camera.cpp \
     Engine/contex.cpp \
+    Engine/data.cpp \
+    Engine/mesh.cpp \
+    Engine/render.cpp \
     main.cpp \
     mainwindow.cpp
 
 HEADERS += \
+    Engine/camera.h \
     Engine/contex.h \
+    Engine/data.h \
+    Engine/mesh.h \
+    Engine/render.h \
     mainwindow.h
 
 FORMS += \

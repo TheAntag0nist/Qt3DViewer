@@ -25,6 +25,7 @@ public slots:
 
 private:
     QLabel* screen;
+    QPixmap map;
 
     int width;
     int height;

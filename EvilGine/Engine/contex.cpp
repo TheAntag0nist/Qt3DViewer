@@ -2,9 +2,10 @@
 
 Contex::Contex(QWidget* parent)
 {
+    map = QPixmap(800, 600);
     screen = new QLabel(parent);
-
     screen->setGeometry( x, y, width, height);
+
     screen->show();
 }
 
@@ -19,24 +20,17 @@ void Contex::SetGeometry(int x, int y, int w, int h){
     this->width = w;
     this->height = h;
 
-    screen->setGeometry( this->x, this->y, width, height);
+    screen->setGeometry( x, y, width, height);
+    map = map.scaled(width, height);
 }
 
 void Contex::FillScreen(QColor color){
-    QPixmap* map = new QPixmap(width, height);
-    map->fill(color);
-
-    screen->setPixmap(*map);
-    delete map;
+    map.fill(color);
+    screen->setPixmap(map);
 }
 
 void Contex::OnResize(const QSize sz){
-    // set new size for screen
-    screen->setGeometry( x, y, sz.width(), sz.height());
+    SetGeometry(0, 0, sz.width(), sz.height());
 
-    QPixmap* map = new QPixmap(sz);
-    map->fill(QColor(40,40,40));
-
-    screen->setPixmap(*map);
-    delete map;
+    screen->setPixmap(map);
 }
