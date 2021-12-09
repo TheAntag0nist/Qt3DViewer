@@ -2,11 +2,18 @@
 
 Contex::Contex(QWidget* parent)
 {
-    map = new QPixmap(800, 600);
+    map = new QPixmap(mainSizeMap);
     screen = new QLabel(parent);
     screen->setGeometry( x, y, width, height);
 
     screen->show();
+
+    // test load and add to render
+    Mesh mesh;
+    mesh.ReadOBJ("C:\\Users\\teoru\\_projects\\.MY_PRJ\\EvilGine\\.TestOBJ\\cube.obj");
+    mainRender.AddMesh(mesh);
+
+    mainRender.RenderCamera(mainCamera, map);
 }
 
 Contex::~Contex(){
@@ -33,11 +40,9 @@ void Contex::OnResize(const QSize sz){
     RecreateMap();
     FillScreen(mainBackgroundColor);
 
-    SetGeometry(0, 0, sz.width(), sz.height());
-
     Line test;
-    int delta = 30;
 
+    /*
     test.DrawLine(map,vec2(10 + delta,10 + delta), vec2(20 + delta,300 + delta));
     test.DrawLine(map,vec2(20 + delta,300 + delta), vec2(70 + delta,5 + delta));
     test.DrawLine(map,vec2(70 + delta,5 + delta), vec2(10 + delta,10 + delta));
@@ -53,7 +58,11 @@ void Contex::OnResize(const QSize sz){
     test.DrawLine(map, vec2(50,10), vec2(50,50));
     // 2. good
     test.DrawLine(map, vec2(50,50), vec2(10,50));
+    */
 
+    mainRender.RenderCamera(mainCamera, map);
+
+    SetGeometry(0, 0, sz.width(), sz.height());
     screen->setPixmap(*map);
 }
 
@@ -61,5 +70,5 @@ void Contex::OnResize(const QSize sz){
 void Contex::RecreateMap(){
     if(map != nullptr)
         delete map;
-    map = new QPixmap(800, 600);
+    map = new QPixmap(mainSizeMap);
 }

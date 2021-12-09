@@ -3,6 +3,11 @@
 
 #include <cmath>
 
+class vec2;
+class vec3;
+class vec4;
+class mat4;
+
 class vec2
 {
 public:
@@ -43,9 +48,11 @@ public:
     void SetY(double);
     void SetZ(double);
 
-    double GetX();
-    double GetY();
-    double GetZ();
+    double GetX() const;
+    double GetY() const;
+    double GetZ() const;
+
+    vec2 ToVec2();
 
     vec3 Normalize();
 
@@ -56,6 +63,7 @@ public:
 
     vec3 operator+(vec3);
     vec3 operator-(vec3);
+    // vec3 operator*(mat4);
 
 private:
     double points[3];
@@ -74,10 +82,10 @@ public:
     void SetZ(double);
     void SetW(double);
 
-    double GetX();
-    double GetY();
-    double GetZ();
-    double GetW();
+    double GetX() const;
+    double GetY() const;
+    double GetZ() const;
+    double GetW() const;
 
     vec4 Normalize();
 
@@ -98,6 +106,8 @@ public:
     mat4();
     ~mat4();
     mat4(const mat4&);
+
+    void create();
 
     void one();
     void zero();
@@ -122,6 +132,9 @@ public:
     mat4 operator*(const mat4& second);
     mat4 operator*(const int& num);
 
+    friend vec4 operator*(const mat4 first,const vec3& second);
+    friend vec4 operator*(const mat4 first,const vec4& second);
+
 private:
     double **mat;
 
@@ -129,5 +142,8 @@ private:
 
 void mswap(vec2&);
 void mswap(vec2& ,vec2&);
+
+vec4 operator*(const mat4 first,const vec3& second);
+vec4 operator*(const mat4 first,const vec4& second);
 
 #endif // DATA_H

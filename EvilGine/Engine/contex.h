@@ -9,7 +9,7 @@
 #include "Engine/render.h"
 
 const QColor mainBackgroundColor(40,40,40);
-const QSize mainSizeMap(1600, 800);
+const QSize mainSizeMap(800, 600);
 
 class Contex : QObject
 {
@@ -31,6 +31,9 @@ public slots:
 private:
     QLabel* screen;
     QPixmap* map;
+
+    Render mainRender;
+    Camera mainCamera;
 
     int width;
     int height;

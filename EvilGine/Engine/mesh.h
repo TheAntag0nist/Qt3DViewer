@@ -2,6 +2,8 @@
 #define MESH_H
 
 #include <QRegularExpression>
+#include <QPixmap>
+#include <QImage>
 #include <QStringList>
 #include <QString>
 #include <QObject>
@@ -16,16 +18,23 @@
 
 #include "data.h"
 
+const QColor mainWireframeColor(160,160,160);
+
 enum ROT{
     X,
     Y,
     Z
 };
 
+class Mesh;
+class Line;
+class Triangle;
+
 class Mesh
 {
 public:
     Mesh();
+    Mesh(const Mesh&);
     ~Mesh();
 
     void ReadOBJ(QString file);
@@ -43,10 +52,17 @@ public:
     void Scale(vec3);
     void Scale(double);
 
+    void SetTransform(const mat4);
+    void CreateTriangles();
+    QList<Triangle>& GetTriangles();
+    void Transform();
+
 private:
     int meshId;
     QString meshName;
     QString format;
+
+    QList<Triangle> triangles;
 
     QList<vec3> vertex;
     QList<vec3> normals;
@@ -57,8 +73,27 @@ private:
     vec3 instance;
     mat4 transform;
 
-    void Transform();
     void Parser(QString);
+
+};
+//========================================
+//========================================
+class Line{
+public:
+    Line();
+    Line(vec2, vec2);
+    ~Line();
+
+    void DrawLine( QPixmap*, vec2, vec2);
+
+    void SetPoints(vec2, vec2);
+    void SetPoints(vec2*);
+
+    vec2* GetPoints();
+
+private:
+    vec2 points[2];
+    vec2 center;
 
 };
 //========================================
@@ -78,9 +113,15 @@ public:
 
     vec3 Center();
 
+    bool IsVisible();
+    void IsVisible(bool);
+
+    void Draw(QPixmap*);
+
 private:
     vec3 points[3];
     vec3 center;
+
     bool is_visible;
 };
 

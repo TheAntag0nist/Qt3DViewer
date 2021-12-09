@@ -125,16 +125,25 @@ void vec3::SetZ(double z){
     this->points[2] = z;
 }
 
-double vec3::GetX(){
+double vec3::GetX() const{
     return points[0];
 }
 
-double vec3::GetY(){
+double vec3::GetY() const{
     return points[1];
 }
 
-double vec3::GetZ(){
+double vec3::GetZ() const{
     return points[2];
+}
+
+vec2 vec3::ToVec2(){
+    vec2 result;
+
+    result.SetX(this->points[0]);
+    result.SetY(this->points[1]);
+
+    return result;
 }
 
 vec3 vec3::Normalize(){
@@ -251,19 +260,19 @@ void vec4::SetW(double z){
     this->points[3] = z;
 }
 
-double vec4::GetX(){
+double vec4::GetX() const{
     return points[0];
 }
 
-double vec4::GetY(){
+double vec4::GetY() const{
     return points[1];
 }
 
-double vec4::GetZ(){
+double vec4::GetZ() const{
     return points[2];
 }
 
-double vec4::GetW(){
+double vec4::GetW() const{
     return points[3];
 }
 
@@ -348,7 +357,7 @@ mat4::mat4(){
     for(int i = 0; i < 4; ++i)
         mat[i] = new double[4];
 
-    this->zero();
+    this->indentity();
 }
 
 mat4::~mat4(){
@@ -359,10 +368,10 @@ mat4::~mat4(){
         delete mat[i];
 
     delete mat;
+    mat = nullptr;
 }
 
 mat4::mat4(const mat4& second){
-    this->~mat4();
     mat = new double* [4];
     for(int i = 0; i < 4; ++i)
         mat[i] = new double[4];
@@ -370,6 +379,17 @@ mat4::mat4(const mat4& second){
     for(int i = 0; i < 4; ++i)
         for(int j = 0; j < 4; ++j)
             mat[i][j] = second[i][j];
+}
+
+
+void mat4::create(){
+    if(mat == nullptr){\
+        mat = new double* [4];
+        for(int i = 0; i < 4; ++i)
+            mat[i] = new double[4];
+
+        this->zero();
+    }
 }
 
 double* & mat4::operator[](const int& i) const{
@@ -500,4 +520,27 @@ void mswap(vec2& pnt_1,vec2& pnt_2){
     vec2 temp = pnt_1;
     pnt_1 = pnt_2;
     pnt_2 = temp;
+}
+
+vec4 operator*(const mat4 first,const vec3& second){
+    vec4 result;
+    vec4 tempSecond(second,1);
+
+    result.SetX(first.mat[0][0] * tempSecond.GetX() + first.mat[0][1] * tempSecond.GetY() + first.mat[0][2] * tempSecond.GetZ() + first.mat[0][3] * tempSecond.GetW());
+    result.SetY(first.mat[1][0] * tempSecond.GetX() + first.mat[1][1] * tempSecond.GetY() + first.mat[1][2] * tempSecond.GetZ() + first.mat[1][3] * tempSecond.GetW());
+    result.SetZ(first.mat[2][0] * tempSecond.GetX() + first.mat[2][1] * tempSecond.GetY() + first.mat[2][2] * tempSecond.GetZ() + first.mat[2][3] * tempSecond.GetW());
+    result.SetW(first.mat[3][0] * tempSecond.GetX() + first.mat[3][1] * tempSecond.GetY() + first.mat[3][2] * tempSecond.GetZ() + first.mat[3][3] * tempSecond.GetW());
+
+    return result;
+}
+
+vec4 operator*(const mat4 first,const vec4& second){
+    vec4 result;
+
+    result.SetX(first.mat[0][0] * second.GetX() + first.mat[0][1] * second.GetY() + first.mat[0][2] * second.GetZ() + first.mat[0][3] * second.GetW());
+    result.SetY(first.mat[1][0] * second.GetX() + first.mat[1][1] * second.GetY() + first.mat[1][2] * second.GetZ() + first.mat[1][3] * second.GetW());
+    result.SetZ(first.mat[2][0] * second.GetX() + first.mat[2][1] * second.GetY() + first.mat[2][2] * second.GetZ() + first.mat[2][3] * second.GetW());
+    result.SetW(first.mat[3][0] * second.GetX() + first.mat[3][1] * second.GetY() + first.mat[3][2] * second.GetZ() + first.mat[3][3] * second.GetW());
+
+    return result;
 }

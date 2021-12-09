@@ -9,7 +9,6 @@ MainWindow::MainWindow(QWidget *parent)
     this->setWindowTitle("EvilGine - v0.0.2v");
     // create screen for drawing
     mainScreen = new Contex(this);
-
     // set geometry by mainwindow
     QRect geom = this->geometry();
     mainScreen->SetGeometry( 0, 0,
@@ -17,9 +16,6 @@ MainWindow::MainWindow(QWidget *parent)
                             geom.height());
     // fill with color
     mainScreen->FillScreen(QColor(40,40,40));
-
-    Mesh mesh;
-    mesh.ReadOBJ("C:\\Users\\teoru\\_projects\\.MY_PRJ\\EvilGine\\.TestOBJ\\cube.obj");
 }
 
 MainWindow::~MainWindow()
