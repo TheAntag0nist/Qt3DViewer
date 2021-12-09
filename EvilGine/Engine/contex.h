@@ -6,6 +6,11 @@
 #include <QObject>
 #include <QLabel>
 
+#include "Engine/render.h"
+
+const QColor mainBackgroundColor(40,40,40);
+const QSize mainSizeMap(1600, 800);
+
 class Contex : QObject
 {
     Q_OBJECT
@@ -25,13 +30,15 @@ public slots:
 
 private:
     QLabel* screen;
-    QPixmap map;
+    QPixmap* map;
 
     int width;
     int height;
 
     int x;
     int y;
+
+    void RecreateMap();
 
 };
 

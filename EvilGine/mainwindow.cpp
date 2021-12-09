@@ -17,6 +17,9 @@ MainWindow::MainWindow(QWidget *parent)
                             geom.height());
     // fill with color
     mainScreen->FillScreen(QColor(40,40,40));
+
+    Mesh mesh;
+    mesh.ReadOBJ("C:\\Users\\teoru\\_projects\\.MY_PRJ\\EvilGine\\.TestOBJ\\cube.obj");
 }
 
 MainWindow::~MainWindow()

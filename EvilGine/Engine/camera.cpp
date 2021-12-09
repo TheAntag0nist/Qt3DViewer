@@ -1,11 +1,6 @@
 #include "camera.h"
 
-Camera::Camera()
-{
-
-}
-
-Camera::~Camera(){
+Camera::Camera(){
 
 }
 
@@ -23,4 +18,8 @@ void Camera::SetDirection(vec3 direct){
 
 vec3 Camera::GetDirection(){
     return direction;
+}
+
+void Camera::Move(vec3 mv){
+    position = position + mv;
 }

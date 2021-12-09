@@ -20,7 +20,7 @@ void vec2::SetX(double x){
 }
 
 void vec2::SetY(double y){
-    this->points[0] = y;
+    this->points[1] = y;
 }
 
 double vec2::GetX(){
@@ -487,4 +487,17 @@ void mat4::rotateZ(double angle){
     mat[0][1] = -sin(angle);
     mat[1][0] = sin(angle);
     mat[1][1] = cos(angle);
+}
+//=======================================================
+//=======================================================
+void mswap(vec2& pnt){
+    double x = pnt.points[0];
+    pnt.points[0] = pnt.points[1];
+    pnt.points[1] = x;
+}
+
+void mswap(vec2& pnt_1,vec2& pnt_2){
+    vec2 temp = pnt_1;
+    pnt_1 = pnt_2;
+    pnt_2 = temp;
 }

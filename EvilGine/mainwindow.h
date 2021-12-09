@@ -3,7 +3,11 @@
 
 #include <QMainWindow>
 
+#include "Engine/render.h"
 #include "Engine/contex.h"
+#include "Engine/camera.h"
+#include "Engine/data.h"
+#include "Engine/mesh.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }

@@ -26,6 +26,8 @@ public:
     vec2 operator+(vec2);
     vec2 operator-(vec2);
 
+    friend void mswap(vec2&);
+    friend void mswap(vec2& ,vec2&);
 private:
     double points[2];
 
@@ -124,5 +126,8 @@ private:
     double **mat;
 
 };
+
+void mswap(vec2&);
+void mswap(vec2& ,vec2&);
 
 #endif // DATA_H

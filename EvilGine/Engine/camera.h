@@ -7,13 +7,14 @@ class Camera
 {
 public:
     Camera();
-    ~Camera();
 
     void SetPosition(vec3);
     vec3 GetPosition();
 
     void SetDirection(vec3);
     vec3 GetDirection();
+
+    void Move(vec3);
 
 private:
     vec3 position;
