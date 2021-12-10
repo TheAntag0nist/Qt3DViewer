@@ -18,7 +18,7 @@ public:
     Render();
     ~Render();
 
-    void RenderCamera( Camera camera, QPixmap* contex);
+    void RenderCamera( Camera camera, QImage* contex);
 
     void AddMesh(Mesh& mesh);
     void DeleteMesh(const Mesh& mesh);

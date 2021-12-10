@@ -230,9 +230,7 @@ Line::~Line(){
 }
 
 // Brezenhem line drawing
-void Line::DrawLine( QPixmap* map, vec2 pnt_1, vec2 pnt_2){
-    QImage img = map->toImage();
-
+void Line::DrawLine( QImage* map, vec2 pnt_1, vec2 pnt_2){
     // check line points
     this->points[0] = pnt_1;
     this->points[1] = pnt_2;
@@ -240,7 +238,7 @@ void Line::DrawLine( QPixmap* map, vec2 pnt_1, vec2 pnt_2){
     // double eqauls errors can be
     // dangerous code here!!
     if (points[0].GetX() == points[1].GetX() && points[0].GetY() == points[1].GetY()) {
-        img.setPixel( points[0].GetX(), points[0].GetY(), mainWireframeColor.rgba());
+        map->setPixel( points[0].GetX(), points[0].GetY(), mainWireframeColor.rgba());
         return;
     }
 
@@ -277,7 +275,11 @@ void Line::DrawLine( QPixmap* map, vec2 pnt_1, vec2 pnt_2){
     int y = points[0].GetY();
 
     for(int x = points[0].GetX(); x <= points[1].GetX(); ++x){
-        img.setPixel( steep ? y : x, steep ? x : y, mainWireframeColor.rgba());
+        if(x > 0 && y > 0 && x < 800 && y < 600)
+            map->setPixel( steep ? y : x, steep ? x : y, mainWireframeColor.rgba());
+        else
+            break;
+
         error -= dy;
 
         if(error < 0){
@@ -285,8 +287,6 @@ void Line::DrawLine( QPixmap* map, vec2 pnt_1, vec2 pnt_2){
             error += dx;
         }
     }
-
-    *map = QPixmap::fromImage(img);
 }
 
 void Line::SetPoints(vec2 first, vec2 second){
@@ -360,7 +360,7 @@ void Triangle::IsVisible(bool vis){
 }
 
 // draw trianle
-void Triangle::Draw(QPixmap* map){
+void Triangle::Draw(QImage* map){
     Line ln;
 
     ln.DrawLine(map, points[0].ToVec2(), points[1].ToVec2());
@@ -371,7 +371,7 @@ void Triangle::Draw(QPixmap* map){
     // FloodFill( map, mainWireframeColor);
 }
 
-void Triangle::FloodFill(QPixmap* map,QColor color){
+void Triangle::FloodFill(QImage* map,QColor color){
     QStack<vec2> fillStack;
     fillStack.push(center.ToVec2());
 
@@ -380,18 +380,14 @@ void Triangle::FloodFill(QPixmap* map,QColor color){
             (points[0].GetY() == points[1].GetY() && points[1].GetY() == points[2].GetY()))
         return;
 
-    /*
-    QImage img = map->toImage();
     while(!fillStack.isEmpty()){
         vec2 point = fillStack.pop();
-        img.setPixel(point.GetX(), point.GetY(), color.rgba());
+        map->setPixel(point.GetX(), point.GetY(), color.rgba());
 
-
-
-        auto temp = GetPixel(img, point.GetX() + 1, point.GetY()).rgba();
-        auto temp_1 = GetPixel(img, point.GetX(), point.GetY() + 1).rgba();
-        auto temp_2 = GetPixel(img, point.GetX() - 1, point.GetY()).rgba();
-        auto temp_3 = GetPixel(img, point.GetX(), point.GetY() - 1).rgba();
+        auto temp = GetPixel(map, point.GetX() + 1, point.GetY()).rgba();
+        auto temp_1 = GetPixel(map, point.GetX(), point.GetY() + 1).rgba();
+        auto temp_2 = GetPixel(map, point.GetX() - 1, point.GetY()).rgba();
+        auto temp_3 = GetPixel(map, point.GetX(), point.GetY() - 1).rgba();
 
         if(temp != mainColor)
                 fillStack.push(vec2(point.GetX() + 1, point.GetY()));
@@ -402,16 +398,12 @@ void Triangle::FloodFill(QPixmap* map,QColor color){
         if(temp_3 != mainColor)
                 fillStack.push(vec2(point.GetX(), point.GetY() - 1));
     }
-
-
-    *map = QPixmap::fromImage(img);
-    */
 }
 
 
-QColor Triangle::GetPixel(QImage img, int x, int y){
-    if(x > 0 && y > 0){
-        QRgb *rowData = (QRgb*)img.scanLine(x);
+QColor Triangle::GetPixel(QImage* img, int x, int y){
+    if(x > 0 && y > 0 && x < 800 && y < 600){
+        QRgb *rowData = (QRgb*)img->scanLine(x);
         QRgb pixelData = rowData[y];
 
         return QColor(pixelData);

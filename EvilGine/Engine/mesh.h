@@ -87,7 +87,7 @@ public:
     Line(vec2, vec2);
     ~Line();
 
-    void DrawLine( QPixmap*, vec2, vec2);
+    void DrawLine( QImage*, vec2, vec2);
 
     void SetPoints(vec2, vec2);
     void SetPoints(vec2*);
@@ -119,9 +119,9 @@ public:
     bool IsVisible();
     void IsVisible(bool);
 
-    void Draw(QPixmap*);
-    void FloodFill(QPixmap*, QColor);
-    QColor GetPixel(QImage, int, int);
+    void Draw(QImage*);
+    void FloodFill(QImage*, QColor);
+    QColor GetPixel(QImage*, int, int);
 
 private:
     vec3 points[3];

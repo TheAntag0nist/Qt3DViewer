@@ -1,7 +1,9 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
+#include <QFileDialog>
 #include <QMainWindow>
+#include <QTimer>
 
 #include "Engine/render.h"
 #include "Engine/contex.h"
@@ -21,9 +23,16 @@ public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
 
+signals:
+    void OpenFileSignal(const QString);
+
+public slots:
+    void OpenFile();
+
 private:
     Ui::MainWindow *ui;
     Contex* mainScreen;
+    QTimer *renderTimer;
 
 protected:
     void resizeEvent(QResizeEvent * event);

@@ -5,13 +5,14 @@
 #include <QWidget>
 #include <QObject>
 #include <QLabel>
+#include <QTime>
 
 #include "Engine/render.h"
 
 const QColor mainBackgroundColor(40,40,40);
 const QSize mainSizeMap(800, 600);
 
-class Contex : QObject
+class Contex : public QObject
 {
     Q_OBJECT
 public:
@@ -27,10 +28,16 @@ signals:
 
 public slots:
     void OnResize(const QSize);
+    void OnOpenFile(const QString);
+    void RenderLoop();
 
 private:
+    QLabel* fpsLabel;
     QLabel* screen;
-    QPixmap* map;
+    QImage map;
+    QTime FPS[2];
+
+    bool firstRender;
 
     Render mainRender;
     Camera mainCamera;
@@ -41,7 +48,7 @@ private:
     int x;
     int y;
 
-    void RecreateMap();
+    void CreateMap();
 
 };
 
