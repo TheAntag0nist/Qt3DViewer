@@ -490,22 +490,22 @@ void mat4::scale(vec3 s){
 
 void mat4::rotateX(double angle){
     mat[1][1] = cos(angle);
-    mat[1][2] = -sin(angle);
-    mat[2][1] = sin(angle);
+    mat[1][2] = sin(angle);
+    mat[2][1] = -sin(angle);
     mat[2][2] = cos(angle);
 }
 
 void mat4::rotateY(double angle){
     mat[0][0] = cos(angle);
-    mat[0][2] = sin(angle);
-    mat[2][1] = -sin(angle);
+    mat[0][2] = -sin(angle);
+    mat[2][0] = sin(angle);
     mat[2][2] = cos(angle);
 }
 
 void mat4::rotateZ(double angle){
     mat[0][0] = cos(angle);
-    mat[0][1] = -sin(angle);
-    mat[1][0] = sin(angle);
+    mat[0][1] = sin(angle);
+    mat[1][0] = -sin(angle);
     mat[1][1] = cos(angle);
 }
 //=======================================================

@@ -84,8 +84,6 @@ void Mesh::Parser(QString line){
                 }
             }
         }
-
-        CreateTriangles();
     }
     catch(std::exception ex){
         qDebug() << "[ERR]:> " << ex.what() << ";";
@@ -122,15 +120,17 @@ void Mesh::SetName(QString name){
 }
 
 vec3 Mesh::Center(){
-    for(int i = 0; i < vertex.length(); ++i)
+    center  = vec3(0,0,0);
+    for(int i = 0; i < vertex.size(); ++i)
         center = center + vertex.at(i);
 
-    center = center / vertex.length();
+    center = center / vertex.size();
 
     return center;
 }
 
 void Mesh::Rotate( ROT type, double angle){
+    transform.indentity();
     switch (type) {
         case X:
             transform.rotateX(angle);
@@ -147,18 +147,22 @@ void Mesh::Rotate( ROT type, double angle){
 }
 
 void Mesh::Move(vec3 move){
+    transform.indentity();
     transform.move(move);
+    moveFlag = true;
 
     Transform();
 }
 
 void Mesh::Scale(vec3 s){
+    transform.indentity();
     transform.scale(s);
 
     Transform();
 }
 
 void Mesh::Scale(double w){
+    transform.indentity();
     transform.scale(w);
 
     Transform();
@@ -191,14 +195,19 @@ void Mesh::Transform(){
     vec4 tempVertex;
 
     for(auto ver = vertex.begin(); ver != vertex.end(); ++ver){
-        tempVertex = transform * *ver;
+        auto vec = (moveFlag) ?  *ver : (*ver - center);
+        tempVertex = transform * vec;
 
         double w = tempVertex.GetW();
 
         (*ver).SetX(tempVertex.GetX() / w);
         (*ver).SetY(tempVertex.GetY() / w);
         (*ver).SetZ(tempVertex.GetZ() / w);
+
+        (*ver) = moveFlag ? *ver : *ver + center;
     }
+
+    moveFlag = false;
 }
 
 QList<Triangle>& Mesh::GetTriangles(){
@@ -354,7 +363,59 @@ void Triangle::IsVisible(bool vis){
 void Triangle::Draw(QPixmap* map){
     Line ln;
 
-    ln.DrawLine(map, points[0].ToVec2() * 30 + 200, points[1].ToVec2() * 30 + 200);
-    ln.DrawLine(map, points[1].ToVec2() * 30 + 200, points[2].ToVec2() * 30 + 200);
-    ln.DrawLine(map, points[2].ToVec2() * 30 + 200, points[0].ToVec2() * 30 + 200);
+    ln.DrawLine(map, points[0].ToVec2(), points[1].ToVec2());
+    ln.DrawLine(map, points[1].ToVec2(), points[2].ToVec2());
+    ln.DrawLine(map, points[2].ToVec2(), points[0].ToVec2());
+
+    Center();
+    // FloodFill( map, mainWireframeColor);
+}
+
+void Triangle::FloodFill(QPixmap* map,QColor color){
+    QStack<vec2> fillStack;
+    fillStack.push(center.ToVec2());
+
+    auto mainColor = mainWireframeColor.rgba();
+    if((points[0].GetX() == points[1].GetX() && points[1].GetX() == points[2].GetX()) ||
+            (points[0].GetY() == points[1].GetY() && points[1].GetY() == points[2].GetY()))
+        return;
+
+    /*
+    QImage img = map->toImage();
+    while(!fillStack.isEmpty()){
+        vec2 point = fillStack.pop();
+        img.setPixel(point.GetX(), point.GetY(), color.rgba());
+
+
+
+        auto temp = GetPixel(img, point.GetX() + 1, point.GetY()).rgba();
+        auto temp_1 = GetPixel(img, point.GetX(), point.GetY() + 1).rgba();
+        auto temp_2 = GetPixel(img, point.GetX() - 1, point.GetY()).rgba();
+        auto temp_3 = GetPixel(img, point.GetX(), point.GetY() - 1).rgba();
+
+        if(temp != mainColor)
+                fillStack.push(vec2(point.GetX() + 1, point.GetY()));
+        if(temp_1 != mainColor)
+                fillStack.push(vec2(point.GetX(), point.GetY() + 1));
+        if(temp_2 != mainColor)
+                fillStack.push(vec2(point.GetX() - 1, point.GetY()));
+        if(temp_3 != mainColor)
+                fillStack.push(vec2(point.GetX(), point.GetY() - 1));
+    }
+
+
+    *map = QPixmap::fromImage(img);
+    */
+}
+
+
+QColor Triangle::GetPixel(QImage img, int x, int y){
+    if(x > 0 && y > 0){
+        QRgb *rowData = (QRgb*)img.scanLine(x);
+        QRgb pixelData = rowData[y];
+
+        return QColor(pixelData);
+    }
+
+    return mainWireframeColor;
 }

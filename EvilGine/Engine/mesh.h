@@ -10,6 +10,7 @@
 #include <QDebug>
 #include <QFile>
 #include <QList>
+#include <QStack>
 
 #include <exception>
 #include <iostream>
@@ -73,6 +74,8 @@ private:
     vec3 instance;
     mat4 transform;
 
+    bool moveFlag;
+
     void Parser(QString);
 
 };
@@ -117,6 +120,8 @@ public:
     void IsVisible(bool);
 
     void Draw(QPixmap*);
+    void FloodFill(QPixmap*, QColor);
+    QColor GetPixel(QImage, int, int);
 
 private:
     vec3 points[3];
