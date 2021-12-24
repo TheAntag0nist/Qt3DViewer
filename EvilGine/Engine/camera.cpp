@@ -23,3 +23,17 @@ vec3 Camera::GetDirection(){
 void Camera::Move(vec3 mv){
     position = position + mv;
 }
+
+void Camera::Rotate(ROT type, double angle){
+    switch (type) {
+        case X:
+            direction.SetX(angle);
+            break;
+        case Y:
+            direction.SetY(angle);
+            break;
+        case Z:
+            direction.SetZ(angle);
+            break;
+    }
+}

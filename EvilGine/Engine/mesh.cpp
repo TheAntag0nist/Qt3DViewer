@@ -29,6 +29,8 @@ void Mesh::ReadOBJ(QString file){
     if(!readFile.open(QIODevice::ReadOnly | QIODevice::Text))
         qDebug() << "[ERR]:> Mesh::ReadOBJ(QString);";
 
+    SetName(GetName(file));
+
     QString allLines = readFile.readAll();
     QStringList lines = allLines.split('\n', Qt::SkipEmptyParts);
     for(int i = 0; i < lines.size(); ++i)
@@ -46,16 +48,7 @@ void Mesh::Parser(QString line){
 
     try{
         if(format == "obj"){
-            if(line.contains("v ")){
-                QStringList data = line.split(" ", Qt::SkipEmptyParts);
-
-                ver.SetX(data.takeAt(1).toDouble());
-                ver.SetY(data.takeAt(1).toDouble());
-                ver.SetZ(data.takeAt(1).toDouble());
-
-                vertex.push_back(ver);
-            }
-            if(line.contains("vn ")){
+            if(line[0] == 'v' && line[1] == 'n'){
                 QStringList data = line.split(" ", Qt::SkipEmptyParts);
 
                 ver.SetX(data.takeAt(1).toDouble());
@@ -64,7 +57,19 @@ void Mesh::Parser(QString line){
 
                 normals.push_back(ver);
             }
-            if(line.contains("f ")){
+            else if(line[0] == 'v' && line[1] == 't'){
+
+            }
+            else if(line[0] == 'v'){
+                QStringList data = line.split(" ", Qt::SkipEmptyParts);
+
+                ver.SetX(data.takeAt(1).toDouble());
+                ver.SetY(data.takeAt(1).toDouble());
+                ver.SetZ(data.takeAt(1).toDouble());
+
+                vertex.push_back(ver);
+            }
+            if(line[0] == 'f'){
                 QStringList data = line.split(" ", Qt::SkipEmptyParts);
                 int current = 0;
 
@@ -88,6 +93,22 @@ void Mesh::Parser(QString line){
     catch(std::exception ex){
         qDebug() << "[ERR]:> " << ex.what() << ";";
     }
+}
+
+QString Mesh::GetName(QString input){
+    QString output = "";
+    std::string inp = input.toStdString();
+
+    for(int i = inp.length() - 1; i > 0; --i){
+        if(inp[i] == '/')
+            break;
+
+        output += inp[i];
+    }
+
+    std::reverse(output.begin(), output.end());
+
+    return output;
 }
 
 int GetIndex(QString indexes, int indexNum){
@@ -146,6 +167,24 @@ void Mesh::Rotate( ROT type, double angle){
     Transform();
 }
 
+
+void Mesh::Rotate(  ROT type, double angle, vec3 center){
+    transform.indentity();
+    switch (type) {
+        case X:
+            transform.rotateX(angle);
+            break;
+        case Y:
+            transform.rotateY(angle);
+            break;
+        case Z:
+            transform.rotateZ(angle);
+            break;
+    }
+
+    Transform(center);
+}
+
 void Mesh::Move(vec3 move){
     transform.indentity();
     transform.move(move);
@@ -190,12 +229,14 @@ void Mesh::CreateTriangles(){
     }
 }
 
-void Mesh::Transform(){
+void Mesh::Transform(vec3 point){
+    bool pointFlag = false;
     this->Center();
     vec4 tempVertex;
 
     for(auto ver = vertex.begin(); ver != vertex.end(); ++ver){
-        auto vec = (moveFlag) ?  *ver : (*ver - center);
+        vec3 vec = (moveFlag) ?  *ver : (*ver - center);
+
         tempVertex = transform * vec;
 
         double w = tempVertex.GetW();
@@ -207,6 +248,7 @@ void Mesh::Transform(){
         (*ver) = moveFlag ? *ver : *ver + center;
     }
 
+    pointFlag = false;
     moveFlag = false;
 }
 
@@ -230,7 +272,7 @@ Line::~Line(){
 }
 
 // Brezenhem line drawing
-void Line::DrawLine( QImage* map, vec2 pnt_1, vec2 pnt_2){
+void Line::DrawLine( QImage* map, vec2 pnt_1, vec2 pnt_2, QColor color){
     // check line points
     this->points[0] = pnt_1;
     this->points[1] = pnt_2;
@@ -238,7 +280,9 @@ void Line::DrawLine( QImage* map, vec2 pnt_1, vec2 pnt_2){
     // double eqauls errors can be
     // dangerous code here!!
     if (points[0].GetX() == points[1].GetX() && points[0].GetY() == points[1].GetY()) {
-        map->setPixel( points[0].GetX(), points[0].GetY(), mainWireframeColor.rgba());
+        if(points[0].GetX() > 0 && points[0].GetY() > 0 &&
+                points[0].GetX() < map->width() && points[0].GetY() < map->height())
+            map->setPixel( points[0].GetX(), points[0].GetY(), color.rgba());
         return;
     }
 
@@ -275,10 +319,14 @@ void Line::DrawLine( QImage* map, vec2 pnt_1, vec2 pnt_2){
     int y = points[0].GetY();
 
     for(int x = points[0].GetX(); x <= points[1].GetX(); ++x){
-        if(x > 0 && y > 0 && x < 800 && y < 600)
+        /*
+        if(x > 0 && y > 0 && x < map->width() && y < map->height())
             map->setPixel( steep ? y : x, steep ? x : y, mainWireframeColor.rgba());
         else
             break;
+        */
+
+        map->setPixel( steep ? y : x, steep ? x : y, color.rgba());
 
         error -= dy;
 
@@ -306,6 +354,7 @@ vec2* Line::GetPoints(){
 //========================================
 Triangle::Triangle(){
     is_visible = true;
+    IsShadow = false;
 }
 
 Triangle::~Triangle(){
@@ -360,54 +409,99 @@ void Triangle::IsVisible(bool vis){
 }
 
 // draw trianle
-void Triangle::Draw(QImage* map){
+void Triangle::Draw(QImage* map, vec3& camPos){
     Line ln;
 
-    ln.DrawLine(map, points[0].ToVec2(), points[1].ToVec2());
-    ln.DrawLine(map, points[1].ToVec2(), points[2].ToVec2());
-    ln.DrawLine(map, points[2].ToVec2(), points[0].ToVec2());
+    pnt[0] = Projection(map, camPos, points[0]);
+    pnt[1] = Projection(map, camPos, points[1]);
+    pnt[2] = Projection(map, camPos, points[2]);
 
-    Center();
-    // FloodFill( map, mainWireframeColor);
+    int width = map->size().width();
+    int height = map->size().height();
+
+    if((pnt[0].GetX() < width && pnt[0].GetX() > 0) &&
+       (pnt[0].GetY() < height && pnt[0].GetY() > 0) &&
+       (pnt[1].GetX() < width && pnt[1].GetX() > 0) &&
+       (pnt[1].GetY() < height && pnt[1].GetY() > 0) &&
+       (pnt[2].GetX() < width && pnt[2].GetX() > 0) &&
+       (pnt[2].GetY() < height && pnt[2].GetY() > 0)){
+        QColor color = mainWireframeColor;
+        if(IsShadow)
+            color = QColor(0,0,0);
+        ln.DrawLine(map, pnt[0], pnt[1], color);
+        ln.DrawLine(map, pnt[1], pnt[2], color);
+        ln.DrawLine(map, pnt[2], pnt[0], color);
+
+        auto centerTemp = Center();
+        auto tempResult = Projection(map, camPos, centerTemp);
+
+        FloodFill( map, QColor(120,120,120), tempResult);
+        FloodFill( map, QColor(120,120,120), pnt[0]);
+        FloodFill( map, QColor(120,120,120), pnt[1]);
+        FloodFill( map, QColor(120,120,120), pnt[2]);
+    }
 }
 
-void Triangle::FloodFill(QImage* map,QColor color){
+void Triangle::FloodFill(QImage* map,QColor color, vec2 point){
     QStack<vec2> fillStack;
-    fillStack.push(center.ToVec2());
+    fillStack.push(point);
 
-    auto mainColor = mainWireframeColor.rgba();
-    if((points[0].GetX() == points[1].GetX() && points[1].GetX() == points[2].GetX()) ||
-            (points[0].GetY() == points[1].GetY() && points[1].GetY() == points[2].GetY()))
-        return;
+    QRgb mainColor = mainWireframeColor.rgba();
+    auto fillColor = color.rgba();
+    if(IsShadow){
+        mainColor = QColor(0,0,0).rgba();
+        fillColor = mainColor;
+    }
 
     while(!fillStack.isEmpty()){
         vec2 point = fillStack.pop();
-        map->setPixel(point.GetX(), point.GetY(), color.rgba());
+
+        // check point (is is in triangle)
+        double checkPoint_0 = (pnt[0].GetX() - point.GetX()) * (pnt[1].GetY() - pnt[0].GetY()) - (pnt[1].GetX() - pnt[0].GetX()) * (pnt[0].GetY() - point.GetY());
+        double checkPoint_1 = (pnt[1].GetX() - point.GetX()) * (pnt[2].GetY() - pnt[1].GetY()) - (pnt[2].GetX() - pnt[1].GetX()) * (pnt[1].GetY() - point.GetY());
+        double checkPoint_2 = (pnt[2].GetX() - point.GetX()) * (pnt[0].GetY() - pnt[2].GetY()) - (pnt[0].GetX() - pnt[2].GetX()) * (pnt[2].GetY() - point.GetY());
+
+        if(checkPoint_0 < 0 || checkPoint_1 < 0 || checkPoint_2 < 0)
+            continue;
+
+        map->setPixel(point.GetX(), point.GetY(), fillColor);
 
         auto temp = GetPixel(map, point.GetX() + 1, point.GetY()).rgba();
         auto temp_1 = GetPixel(map, point.GetX(), point.GetY() + 1).rgba();
         auto temp_2 = GetPixel(map, point.GetX() - 1, point.GetY()).rgba();
         auto temp_3 = GetPixel(map, point.GetX(), point.GetY() - 1).rgba();
 
-        if(temp != mainColor)
+        if(temp != mainColor && temp != fillColor)
                 fillStack.push(vec2(point.GetX() + 1, point.GetY()));
-        if(temp_1 != mainColor)
+        if(temp_1 != mainColor && temp_1 != fillColor)
                 fillStack.push(vec2(point.GetX(), point.GetY() + 1));
-        if(temp_2 != mainColor)
+        if(temp_2 != mainColor && temp_2 != fillColor)
                 fillStack.push(vec2(point.GetX() - 1, point.GetY()));
-        if(temp_3 != mainColor)
+        if(temp_3 != mainColor && temp_3 != fillColor)
                 fillStack.push(vec2(point.GetX(), point.GetY() - 1));
     }
 }
 
 
 QColor Triangle::GetPixel(QImage* img, int x, int y){
-    if(x > 0 && y > 0 && x < 800 && y < 600){
-        QRgb *rowData = (QRgb*)img->scanLine(x);
-        QRgb pixelData = rowData[y];
+    if(x > 0 && y > 0 && x < img->width() && y < img->height()){
+        QRgb *rowData = (QRgb*)img->scanLine(y);
+        QRgb pixelData = rowData[x];
 
         return QColor(pixelData);
     }
 
     return mainWireframeColor;
+}
+
+vec2 Triangle::Projection(QImage* map,vec3 cam, vec3 point){
+    vec2 result;
+    float Scale = map->size().width() / (float)(2 * 200 * tan(2.29 / 2));
+
+    auto delta = (near - (cam.GetZ() - point.GetZ())) * Scale;
+    auto proection = point.ToVec2() * delta;
+    auto screen = proection + vec2(map->size().width() / 2, -map->size().height() / 2);
+    auto screenCoords = vec2(screen.GetX(), -screen.GetY());
+
+    return screenCoords;
 }

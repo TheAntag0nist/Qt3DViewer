@@ -19,10 +19,13 @@ public:
     ~Render();
 
     void RenderCamera( Camera camera, QImage* contex);
+    void CreateShadow(Mesh& mesh);
 
     void AddMesh(Mesh& mesh);
-    void DeleteMesh(const Mesh& mesh);
-    void DeleteMesh(const int meshId);
+    void DeleteMesh(const QString& meshName);
+    Mesh& GetMeshByName(const QString& meshName);
+
+    QList<Mesh>& GetMeshes();
 
 private:
     QList<Mesh> meshes;

@@ -15,6 +15,7 @@ public:
     vec3 GetDirection();
 
     void Move(vec3);
+    void Rotate(ROT type, double angle);
 
 private:
     vec3 position;

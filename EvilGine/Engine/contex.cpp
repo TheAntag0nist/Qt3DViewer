@@ -7,15 +7,10 @@ Contex::Contex(QWidget* parent){
     fpsLabel = new QLabel(screen);
     fpsLabel->setStyleSheet("QLabel { color : white; }");
 
+    mainCamera.SetPosition(vec3(0,10, 350));
+
     screen->setGeometry( x, y, width, height);
     screen->show();
-
-    // test load and add to render
-    Mesh mesh;
-    mesh.ReadOBJ("C:\\Users\\teoru\\_projects\\.MY_PRJ\\EvilGine\\.TestOBJ\\cube.obj");
-    mainRender.AddMesh(mesh);
-
-    mainRender.RenderCamera(mainCamera, &map);
 }
 
 Contex::~Contex(){
@@ -47,7 +42,7 @@ void Contex::OnResize(const QSize sz){
     // infuenc on scale
     mainRender.RenderCamera(mainCamera, &map);
 
-    SetGeometry(0, 20, sz.width(), sz.height() - 20);
+    SetGeometry( 0, 20, sz.width() - 200, sz.height() - 20);
     screen->setPixmap(QPixmap::fromImage(map));
 }
 
@@ -58,6 +53,7 @@ void Contex::OnOpenFile(const QString path){
     if(path.contains(".obj")){
         mesh.ReadOBJ(path);
         mainRender.AddMesh(mesh);
+        emit AddMesh(mesh);
     }
 }
 
@@ -75,4 +71,12 @@ void Contex::RenderLoop(){
 void Contex::CreateMap(){
     QPixmap* tempMap = new QPixmap(mainSizeMap);
     map = tempMap->toImage();
+}
+
+Camera& Contex::GetCamera(){
+    return mainCamera;
+}
+
+Render& Contex::GetRender(){
+    return mainRender;
 }

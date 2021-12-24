@@ -2,30 +2,33 @@
 #define MESH_H
 
 #include <QRegularExpression>
-#include <QPixmap>
-#include <QImage>
 #include <QStringList>
+#include <QPixmap>
 #include <QString>
 #include <QObject>
+#include <QVector>
+#include <QImage>
 #include <QDebug>
+#include <QStack>
 #include <QFile>
 #include <QList>
-#include <QStack>
 
 #include <exception>
 #include <iostream>
 #include <fstream>
 #include <string>
+#include <float.h>
 
 #include "data.h"
 
 const QColor mainWireframeColor(160,160,160);
+const double fov = 1.57;
+const double far = 1000;
+const double near = 400;
 
-enum ROT{
-    X,
-    Y,
-    Z
-};
+static double aspect = 0.0;
+static mat4 projectionMatrix;
+static vec3 defaultValueVec3 = vec3(-DBL_MAX, -DBL_MAX, -DBL_MAX);
 
 class Mesh;
 class Line;
@@ -48,15 +51,16 @@ public:
     void SetInstance();
 
     vec3 Center();
-    void Rotate( ROT, double);
     void Move(vec3);
     void Scale(vec3);
     void Scale(double);
+    void Rotate( ROT, double);
+    void Rotate( ROT, double, vec3);
 
-    void SetTransform(const mat4);
+    void Transform(vec3 point = defaultValueVec3);
     void CreateTriangles();
+    void SetTransform(const mat4);
     QList<Triangle>& GetTriangles();
-    void Transform();
 
 private:
     int meshId;
@@ -65,10 +69,10 @@ private:
 
     QList<Triangle> triangles;
 
-    QList<vec3> vertex;
-    QList<vec3> normals;
-    QList<int> indexFaces;
-    QList<int> indexNormals;
+    QVector<vec3> vertex;
+    QVector<vec3> normals;
+    QVector<int> indexFaces;
+    QVector<int> indexNormals;
 
     vec3 center;
     vec3 instance;
@@ -77,6 +81,7 @@ private:
     bool moveFlag;
 
     void Parser(QString);
+    QString GetName(QString);
 
 };
 //========================================
@@ -87,7 +92,7 @@ public:
     Line(vec2, vec2);
     ~Line();
 
-    void DrawLine( QImage*, vec2, vec2);
+    void DrawLine( QImage*, vec2, vec2, QColor color = mainWireframeColor);
 
     void SetPoints(vec2, vec2);
     void SetPoints(vec2*);
@@ -119,15 +124,21 @@ public:
     bool IsVisible();
     void IsVisible(bool);
 
-    void Draw(QImage*);
-    void FloodFill(QImage*, QColor);
+    void Draw(QImage*, vec3& camPos);
+    void FloodFill(QImage*, QColor, vec2 point = vec2(-1,-1));
     QColor GetPixel(QImage*, int, int);
+
+    vec2 Projection(QImage* map,vec3 cam, vec3 point);
+
+    bool IsShadow;
 
 private:
     vec3 points[3];
     vec3 center;
+    vec2 pnt[3];
 
     bool is_visible;
+
 };
 
 int GetIndex(QString indexes, int indexNum);

@@ -8,6 +8,12 @@ class vec3;
 class vec4;
 class mat4;
 
+enum ROT{
+    X,
+    Y,
+    Z
+};
+
 class vec2
 {
 public:

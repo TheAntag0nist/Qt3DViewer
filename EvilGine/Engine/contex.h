@@ -22,9 +22,13 @@ public:
     void SetGeometry(int x = 0, int y = 0, int w = 0, int h = 0);
     void FillScreen(QColor color);
 
+    Camera& GetCamera();
+    Render& GetRender();
+
 signals:
     void Resize();
     void Update();
+    void AddMesh(Mesh&);
 
 public slots:
     void OnResize(const QSize);
@@ -37,10 +41,10 @@ private:
     QImage map;
     QTime FPS[2];
 
-    bool firstRender;
-
     Render mainRender;
     Camera mainCamera;
+
+    bool firstRender;
 
     int width;
     int height;

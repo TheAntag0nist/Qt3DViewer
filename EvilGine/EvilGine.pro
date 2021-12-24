@@ -12,6 +12,7 @@ SOURCES += \
     Engine/camera.cpp \
     Engine/contex.cpp \
     Engine/data.cpp \
+    Engine/light.cpp \
     Engine/mesh.cpp \
     Engine/render.cpp \
     main.cpp \
@@ -21,6 +22,7 @@ HEADERS += \
     Engine/camera.h \
     Engine/contex.h \
     Engine/data.h \
+    Engine/light.h \
     Engine/mesh.h \
     Engine/render.h \
     mainwindow.h
