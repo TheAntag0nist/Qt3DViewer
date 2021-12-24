@@ -1,4 +1,4 @@
-# EvilGine
+# Coursework - EvilGine (just for fun)
 Author: Knyazyuk Ryurik Aleksandrovich <br>
 License: for educational purposes
 ## Description - Qt 3D Viewer
